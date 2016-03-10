@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import socket
+import json
 from MessageReceiver import MessageReceiver
 from MessageParser import MessageParser
 
@@ -15,7 +16,7 @@ class Client:
 
         # Set up the socket connection to the server
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
+        self.connection(host, server_port)
         # TODO: Finish init process with necessary code
         self.run()
 
@@ -32,7 +33,7 @@ class Client:
         pass
 
     def send_payload(self, data):
-        # TODO: Handle sending of a payload
+        json.dumps(data)
         pass
 
     # More methods may be needed!
