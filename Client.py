@@ -16,7 +16,7 @@ class Client:
 
         # Set up the socket connection to the server
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.connection(host, server_port)
+        self.connection.connect(host, server_port)
         # TODO: Finish init process with necessary code
         self.run()
 
