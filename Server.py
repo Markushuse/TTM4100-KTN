@@ -33,19 +33,20 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 			'content': None,
 		}
 
-    def handle_userName(self):
-
-        if not re.match("^[A-Za-z0-9]+$", username):
-
-
-        for conn in connectedClients:
-
-
 
     def handle(self):
         """
         This method handles the connection between a client and the server.
         """
+        self.possible_requests = {
+			'login': self.handle_login,
+			'logout': self.handle_logout,
+			'help': self.handle_help,
+			'msg': self.handle_msg,
+			'names': self.handle_names,
+		}
+
+
         self.username = None
         self.ip = self.client_address[0]
         self.port = self.client_address[1]
@@ -61,7 +62,14 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 
 
             except:
+                pass
+    def handle_login(self, payload):
+        username = payload["content"]
 
+        if not re.match("^[A-Za-z0-9]+$", username):
+
+
+        for conn in connectedClients:
 
             # TODO: Add handling of received payload from client
 
