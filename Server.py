@@ -9,10 +9,10 @@ Variables and functions that must be used by all the ClientHandler objects
 must be written here (e.g. a dictionary for connected clients)
 """
 
-connectedClients = dict{}
+connectedClients = {}
 userNames = []
 chatHistory = []
-helpText = "Available commands: login <username>, logout, msg <message>, names, help"
+helpText = "Available commands: login <username>, logout, message <msg>, names, help"
 
 class ClientHandler(SocketServer.BaseRequestHandler):
     """
@@ -25,9 +25,9 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         ts = time.time()
         return datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
 
-    def responsePayload(sender, response, content):
+    def responsePayload(self, sender, response, content):
       response_payload = {
-			'timestamp': returnTimeStamp(),
+			'timestamp': self.returnTimeStamp(),
 			'sender': None,
 			'response': None,
 			'content': None,
@@ -70,7 +70,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
     def handle_login(self, payload):
         if self.handle_names():
             self.responsePayload('server', 'info', 'Login successful')
-            connectedClients[self.username] = self.connection
+            connectedClients.update({self.username, self.connection})
 
 
     def handle_names(self, payload):
@@ -101,7 +101,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         self.responsePayload('server', 'info', helpText)
 
     def handle_message(self, payload):
-
+        pass
 
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
