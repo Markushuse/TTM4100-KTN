@@ -10,8 +10,9 @@ must be written here (e.g. a dictionary for connected clients)
 """
 
 connectedClients = dict{}
-
 userNames = []
+chatHistory = []
+helpText = "Available commands: login <username>, logout, msg <message>, names, help"
 
 class ClientHandler(SocketServer.BaseRequestHandler):
     """
@@ -20,18 +21,20 @@ class ClientHandler(SocketServer.BaseRequestHandler):
     only connected clients, and not the server itself. If you want to write
     logic for the server, you must write it outside this class
     """
-
     def returnTimeStamp(self):
         ts = time.time()
         return datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
 
-
-    response_payload = {
+    def responsePayload(sender, response, content):
+      response_payload = {
 			'timestamp': returnTimeStamp(),
-			'sender': 'server',
+			'sender': None,
 			'response': None,
 			'content': None,
-		}
+        }
+      response_payload['sender'] = sender
+      response_payload['response'] = response
+      response_payload['content'] = content
 
 
     def handle(self):
@@ -42,10 +45,9 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 			'login': self.handle_login,
 			'logout': self.handle_logout,
 			'help': self.handle_help,
-			'msg': self.handle_msg,
+			'message': self.handle_message,
 			'names': self.handle_names,
 		}
-
 
         self.username = None
         self.ip = self.client_address[0]
@@ -60,18 +62,46 @@ class ClientHandler(SocketServer.BaseRequestHandler):
                 request = payload.get("request")
                 content  = payload.get("content")
 
+            except Exception:
+                if self.username in userNames:
+                    userNames.remove(self.username)
+                self.finish()
 
-            except:
-                pass
     def handle_login(self, payload):
+        if self.handle_names():
+            self.responsePayload('server', 'info', 'Login successful')
+            connectedClients[self.username] = self.connection
+
+
+    def handle_names(self, payload):
         username = payload["content"]
-
         if not re.match("^[A-Za-z0-9]+$", username):
+            self.responsePayload('server', 'error', 'Username invalid, must contain only characters or numbers')
+            return 0
+        elif not (len(username) < 16 and len(username) > 0):
+            self.responsePayload('server', 'error', 'Username invalid, too long or too short.')
+            return 0
+        elif username in userNames:
+                self.responsePayload('server', 'error', 'Username already taken')
+                return 0
+        else:
+            self.responsePayload('server', 'info', 'Name approved.')
+            userNames.append(username)
+            return 1
 
+    def handle_logout(self, payload):
+        if self.username in userNames:
+            userNames.remove(self.username)
+            connectedClients.pop(self.username)
+            self.responsePayload('server', 'info', 'Logout succesful.')
+        else:
+            self.responsePayload('server', 'error', 'Not already logged in.')
 
-        for conn in connectedClients:
+    def handle_help(self, payload):
+        self.responsePayload('server', 'info', helpText)
 
-            # TODO: Add handling of received payload from client
+    def handle_message(self, payload):
+
 
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
