@@ -27,6 +27,24 @@ class Client:
         self.connection.connect((self.h, self.serverport))
         self.MReceiver.start()
 
+        while True:
+            userInput = raw_input()
+            try:
+                if userInput:
+                    request, content = userInput.split()
+                    if not content:
+                        content = None
+                payload = {
+                    'request': request,
+                    'content': content
+                }
+                self.send_payload(payload)
+
+            except KeyboardInterrupt:
+                self.disconnect()
+
+    def handleInput(self, userInput):
+        message = userInput.split(' ')
 
     def disconnect(self):
         self.connection.close()
@@ -39,9 +57,6 @@ class Client:
     def send_payload(self, data):
         payload = json.dumps(data)
         self.connection.send(payload)
-        pass
-
-    # More methods may be needed!
 
 
 if __name__ == '__main__':
