@@ -28,19 +28,35 @@ class Client:
         self.MReceiver.start()
 
         while True:
-            userInput = raw_input()
-            try:
-                if userInput:
-                    request, content = userInput.split()
-                    if not content:
-                        content = None
-                payload = {
+            
+            try: 
+
+                userinput = raw_input()
+                request = userinput.split()[0]
+                content = None
+
+                if not len(userinput.split()) < 2: 
+                    content = userinput.split(' ',1)[1]
+
+                
+                valid_requests = {"help","names","logout","login","msg"}
+                if request in valid_requests:
+                    print ("This is a valid request")
+                    
+                    ## Kanskje vi skal utføre bestemte ting her og ikke bare sende data til server.
+                    payload = {
                     'request': request,
                     'content': content
-                }
-                self.send_payload(payload)
+                     }
 
-            except KeyboardInterrupt:
+                    print ("Sending payload")
+                    self.send_payload(payload)
+
+
+                else:
+                    print ("Not a valid request")    
+
+            except (KeyboardInterrupt):
                 self.disconnect()
 
     def handleInput(self, userInput):
